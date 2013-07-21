@@ -1,0 +1,5 @@
+Gemfile.lock
+.ruby-gemset
+.ruby-version
+.gitexcludes
+.DS_Store
