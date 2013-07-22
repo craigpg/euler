@@ -7,17 +7,13 @@ class Grid11
   end
   
   def solution(sentence_length = 4)
-    max_product(sentences_from_grid(sentence_length))
+    [max_product_in_rows(rows, sentence_length),
+     max_product_in_rows(cols, sentence_length),
+     max_product_in_rows(nw_to_se_diagonals(sentence_length), sentence_length),
+     max_product_in_rows(ne_to_sw_diagonals(sentence_length), sentence_length)].max
   end
 
   private
-  
-  def sentences_from_grid(sentence_length = 4)
-    (rows.map{|row| sentences_from_row(row, sentence_length)} +
-     cols.map{|row| sentences_from_row(row, sentence_length)} +
-     nw_to_se_diagonals(sentence_length).map{|row| sentences_from_row(row, sentence_length)} +
-     ne_to_sw_diagonals(sentence_length).map{|row| sentences_from_row(row, sentence_length)}).flatten(1)
-  end
   
   def rows
     grid
@@ -27,12 +23,12 @@ class Grid11
     grid.transpose
   end
   
-  def max_product(sentences)
-    sentences.map{|w| w.inject(&:*)}.max
+  def max_product_in_rows(rows, sentence_length)
+    rows.inject(0){|max, row| [max, max_product_in_row(row, sentence_length)].max}
   end
 
-  def sentences_from_row(row, sentence_length)
-    (0..row.length - sentence_length).map {|i| row[i..(i + sentence_length - 1)]}
+  def max_product_in_row(row, sentence_length)
+    (0..row.length - sentence_length).inject(0) {|max, i| [max, row[i..(i + sentence_length - 1)].inject(&:*)].max}
   end
 
   def nw_to_se_diagonals(sentence_length = 4)

@@ -87,15 +87,18 @@ describe Grid11 do
     context "with a row with 5 words" do
       before :each do
         @row = "08 02 22 97 38".split.map(&:to_i)
-        @sentences = @grid.send(:sentences_from_row, @row, 4)
-      end
-      it "should identify 2 sentences" do
-        @sentences.count.should == 2
-        @sentences.should include([8, 2, 22, 97])
-        @sentences.should include([2, 22, 97, 38])
       end
       it "should find the sentence with the max product of its words" do
-        @grid.send(:max_product, @sentences).should == 162184
+        @grid.send(:max_product_in_row, @row, 4).should == 162184
+      end
+    end
+
+    context "with a 2 rows" do
+      before :each do
+        @rows = ["08 02 22 97".split.map(&:to_i), "02 22 97 38".split.map(&:to_i)]
+      end
+      it "should find max product" do
+        @grid.send(:max_product_in_rows, @rows, 4).should == 162184
       end
     end
   end
