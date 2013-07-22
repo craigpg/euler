@@ -10,16 +10,16 @@ describe Grid11 do
   # a 5x5 is minimum grid size to test with to validate diagonals
   #
   context "with a 5x5 grid" do
-    before :each do
+    before :all do
         @grid = Grid11.new "./spec/fixtures/five_by_five_grid.txt"
-        @rows = @grid.send(:rows)
-        @cols = @grid.send(:cols)
-        @nw_to_se_diagonals = @grid.send(:nw_to_se_diagonals)
-        @ne_to_sw_diagonals = @grid.send(:ne_to_sw_diagonals)
+        @rows = @grid.rows
     end
 
-    it "should have 5 rows" do
-      @rows.count.should == 5
+    it "should have a total of 16 rows" do
+      @rows.count.should == 16
+    end
+    
+    it "should have 5 horizontal rows" do
       @rows.should include([8, 2, 22, 97, 38])
       @rows.should include([49, 49, 99, 40, 17])
       @rows.should include([81, 49, 31, 73, 55])
@@ -27,27 +27,24 @@ describe Grid11 do
       @rows.should include([22, 31, 16, 71, 51])
     end
 
-    it "should have 5 cols" do
-      @cols.count.should == 5
-      @cols.should include([8, 49, 81, 52, 22])
-      @cols.should include([2, 49, 49, 70, 31])
-      @cols.should include([22, 99, 31, 95, 16])
-      @cols.should include([97, 40, 73, 23, 71])
-      @cols.should include([38, 17, 55, 4, 51])
+    it "should have 5 vertical columns" do
+      @rows.should include([8, 49, 81, 52, 22])
+      @rows.should include([2, 49, 49, 70, 31])
+      @rows.should include([22, 99, 31, 95, 16])
+      @rows.should include([97, 40, 73, 23, 71])
+      @rows.should include([38, 17, 55, 4, 51])
     end
     
     it "should have 3 nw_to_se diagonals" do
-      @nw_to_se_diagonals.count.should == 3
-      @nw_to_se_diagonals.should include([49, 49, 95, 71])
-      @nw_to_se_diagonals.should include([8, 49, 31, 23, 51])
-      @nw_to_se_diagonals.should include([2, 99, 73, 4])
+      @rows.should include([49, 49, 95, 71])
+      @rows.should include([8, 49, 31, 23, 51])
+      @rows.should include([2, 99, 73, 4])
     end
     
     it "should have 3 ne_to_sw diagonals" do
-      @ne_to_sw_diagonals.count.should == 3
-      @ne_to_sw_diagonals.should include([97, 99, 49, 52])
-      @ne_to_sw_diagonals.should include([38, 40, 31, 70, 22])
-      @ne_to_sw_diagonals.should include([17, 73, 95, 31])
+      @rows.should include([97, 99, 49, 52])
+      @rows.should include([38, 40, 31, 70, 22])
+      @rows.should include([17, 73, 95, 31])
     end
     
     it "should find the correct solution" do
@@ -83,13 +80,24 @@ describe Grid11 do
                    ].max
       @grid.solution.should == solution
     end
+  end
+  
+  context "with a MaxProductFinder" do
+    before :each do
+      @max_product_finder = MaxProductFinder.new(4)
+    end
+    
+    it "should be initialized correctly" do
+      @max_product_finder.max_product.should == 0
+    end
 
-    context "with a row with 5 words" do
+    context "with a single row with 5 words" do
       before :each do
         @row = "08 02 22 97 38".split.map(&:to_i)
       end
       it "should find the sentence with the max product of its words" do
-        @grid.send(:max_product_in_row, @row, 4).should == 162184
+        @max_product_finder.each_row_proc.call(@row)
+        @max_product_finder.max_product.should == 162184
       end
     end
 
@@ -98,8 +106,40 @@ describe Grid11 do
         @rows = ["08 02 22 97".split.map(&:to_i), "02 22 97 38".split.map(&:to_i)]
       end
       it "should find max product" do
-        @grid.send(:max_product_in_rows, @rows, 4).should == 162184
+        @rows.each {|row| @max_product_finder.each_row_proc.call(row) }
+        @max_product_finder.max_product.should == 162184
       end
     end
   end
+
+  context "with a RowCollector" do
+    before :each do
+      @row_collector = RowCollector.new
+    end
+    
+    it "should be initialized correctly" do
+      @row_collector.rows.should be_empty
+    end
+
+    context "with a single row with 5 words" do
+      before :each do
+        @row = "08 02 22 97 38".split.map(&:to_i)
+      end
+      it "should find the sentence with the max product of its words" do
+        @row_collector.each_row_proc.call(@row)
+        @row_collector.rows.should == [@row]
+      end
+    end
+
+    context "with a 2 rows" do
+      before :each do
+        @rows = ["08 02 22 97".split.map(&:to_i), "02 22 97 38".split.map(&:to_i)]
+      end
+      it "should find max product" do
+        @rows.each {|row| @row_collector.each_row_proc.call(row) }
+        @row_collector.rows.should == @rows
+      end
+    end
+  end
+
 end
